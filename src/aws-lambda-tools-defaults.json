@@ -15,5 +15,5 @@
   "function-runtime":"dotnetcore2.1",
   "function-memory-size" : 256,
   "function-timeout" : 30,
-  "function-handler" : "InTheClouds.Lambda.Seed::InTheClouds.Lambda.Seed.Function::FunctionHandler"
+  "function-handler" : "InTheClouds.Lambda.HealthCheck::InTheClouds.Lambda.HealthCheck.Function::FunctionHandler"
 }

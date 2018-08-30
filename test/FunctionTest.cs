@@ -7,9 +7,9 @@ using Xunit;
 using Amazon.Lambda.Core;
 using Amazon.Lambda.TestUtilities;
 
-using InTheClouds.Lambda.Seed;
+using InTheClouds.Lambda.HealthCheck;
 
-namespace InTheClouds.Lambda.Seed.Tests
+namespace InTheClouds.Lambda.HealthCheck.Tests
 {
     public class FunctionTest
     {

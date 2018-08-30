@@ -1,27 +1,16 @@
-# csharp-lambda-seed
+# health-check-lambda
 
-Simple template project for creating an AWS Lambda function in C# with xUnit&#46;net unit tests.
+AWS Lambda function that Performs health checks of a configurable set of HTTP endpoints.
 
 ### Features
 
-* Flatter directory structure than the AWS supplied Lambda templates
-* Simple .gitignore appropriate for C# projects
+* TODO: Reads endpoints and configuration settings from DynamoDB
+* TODO: Sends an alert through SNS if a health check fails
+* TODO: CloudFormation deployment
 
 ### Getting Started
 
-1. Fork or clone the repository. Alternatively, just download the code and copy it into an existing repository.
-
-2. Find and replace all references to `InTheClouds` and `Seed` with names appropriate for the Lambda function.
-
-    *NOTE*: You might get errors during the rename process due to references between the test and src projects.
-
-3. Restore dependencies and ensure the project builds:
-
-    `dotnet build ./src`
-
-4. Ensure the xUnit&#46;net tests run successfully:
-
-    `dotnet test ./test`
+TODO
 
 ### Dev Dependencies
 
