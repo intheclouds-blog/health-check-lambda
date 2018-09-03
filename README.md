@@ -2,17 +2,28 @@
 
 AWS Lambda function that performs health checks of a configurable set of HTTP endpoints.
 
+See the blog post linked below for more information about this function:
+
+https://www.intheclouds.blog/2018/09/03/endpoint-health-monitoring/
+
 ### Features
 
-* TODO: Reads endpoints and configuration settings from DynamoDB
-* TODO: Sends an alert through SNS if a health check fails
-* TODO: CloudFormation deployment
+* Asynchronously checks a set of HTTP endpoints
+* Reads endpoints from a DynamoDB table
+* Sends notifications through SNS if health checks fail
 
 ### Getting Started
 
-TODO
+1. Install .NET Core 2.1 (https://www.microsoft.com/net/download/dotnet-core/2.1)
+2. Clone this repository to your machine.
+3. Download dependencies, build, and test the code:
 
-#### Manual Deployment
+```
+cd <repo>
+dotnet test ./test
+```
+
+### Manual Deployment
 
 The health-check-lambda Lambda function can be manually deployed using the `.NET Core CLI` and `Amazon Lambda Tools for .NET Core applications` using a command like the following:
 
@@ -20,7 +31,7 @@ The health-check-lambda Lambda function can be manually deployed using the `.NET
 dotnet lambda deploy-function -fn health-check-lambda -frole health-check-lambda
 ```
 
-#### Manual Invocation
+### Manual Invocation
 
 The health-check-lambda Lambda function can be manually invoked using the `.NET Core CLI` and `Amazon Lambda Tools for .NET Core applications` using a command like the following:
 

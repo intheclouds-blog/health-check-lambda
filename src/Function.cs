@@ -103,7 +103,7 @@ namespace InTheClouds.Lambda.HealthCheck
             Log($"Starting health checks using function v{_version}.");
 
             // Get the list of endpoints to check.
-            var endpoints = await GetEndpoints();
+            var endpoints = await GetEndpointsAsync();
 
             // Execute a health check for each endpoint asynchronously.
             var tasks = new List<Task>();
@@ -114,7 +114,7 @@ namespace InTheClouds.Lambda.HealthCheck
                 tasks.Add(task);
             }
 
-            // Wati for all health check tasks to complete.
+            // Wait for all health check tasks to complete.
             await Task.WhenAll(tasks);
 
             Log($"Health check complete.");
@@ -133,12 +133,12 @@ namespace InTheClouds.Lambda.HealthCheck
         }
 
         /// <summary>
-        /// Gets the endpoints to check from DynamoDB.
+        /// Asynchronously gets the endpoints to check from DynamoDB.
         /// </summary>
         /// <returns>
         /// A Task that represents the get operation. When the task completes successfully, the result is a list of endpoints.
         /// </returns>
-        private async Task<List<string>> GetEndpoints()
+        private async Task<List<string>> GetEndpointsAsync()
         {
             const string keyName = "key";
             const string valueName = "value";
