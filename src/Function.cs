@@ -81,7 +81,7 @@ namespace InTheClouds.Lambda.HealthCheck
         /// Initializes a new instance of the Lambda function using the specified instances.
         /// </summary>
         /// <remarks>
-        /// This constructor is useful for injecting fake client instances for unit testing.
+        /// This constructor is useful for injecting fake instances for unit testing.
         /// </remarks>
         public Function(IAmazonDynamoDB ddbClient, IAmazonSimpleNotificationService snsClient)
         {
@@ -94,10 +94,9 @@ namespace InTheClouds.Lambda.HealthCheck
         }
 
         /// <summary>
-        /// A simple function that takes a string and does a ToUpper
+        /// Handles function invocation requests by performing health checks of the configured set of endpoints.
         /// </summary>
-        /// <param name="context">The <see cref="ILambdaContext"/> for the Lambda function</param>
-        /// <returns></returns>
+        /// <param name="context">The <see cref="ILambdaContext"/> for the Lambda function.</param>
         public async Task FunctionHandler(ILambdaContext context)
         {
             Log($"Starting health checks using function v{_version}.");
@@ -226,17 +225,17 @@ namespace InTheClouds.Lambda.HealthCheck
 
             if (ex != null)
             {
-                topicSubject = $"Endpoint {endpoint} Health Check Failed: Exception";
+                topicSubject = $"Health Check Failed for {endpoint}: Exception";
                 topicMessage = $"The health check for endpoint {endpoint} failed at {time:o} with an exception after {elapsedMilliseconds:N0}ms:{Environment.NewLine}{Environment.NewLine}{ex}.";
             }
             else if (statusCode.HasValue)
             {
-                topicSubject = $"Endpoint {endpoint} Health Check Failed: {(int)statusCode.Value}";
-                topicMessage = $"The health check for endpoint {endpoint} failed at {time:o} with an HTTP status code of {(int)statusCode.Value} after {elapsedMilliseconds:N0}ms.";
+                topicSubject = $"Health Check Failed for {endpoint}: {(int)statusCode.Value}";
+                topicMessage = $"The health check for endpoint {endpoint} failed at {time:o} with an HTTP status code of {(int)statusCode.Value} ({statusCode.Value}) after {elapsedMilliseconds:N0}ms.";
             }
             else
             {
-                topicSubject = $"Endpoint {endpoint} Health Check Failed";
+                topicSubject = $"Health Check Failed for {endpoint}";
                 topicMessage = $"The health check for endpoint {endpoint} failed at {time:o} after {elapsedMilliseconds:N0}ms.";
             }
 
