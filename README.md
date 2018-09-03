@@ -14,20 +14,31 @@ https://www.intheclouds.blog/2018/09/03/endpoint-health-monitoring/
 
 ### Getting Started
 
-1. Install .NET Core 2.1 (https://www.microsoft.com/net/download/dotnet-core/2.1)
-2. Clone this repository to your machine.
-3. Download dependencies, build, and test the code:
+1. Install .NET Core 2.1 (https://www.microsoft.com/net/download/dotnet-core/2.1). Ensure the correct version is in your path by running the following from the Terminal (macOS) or Command Prompt (Windows). The version should be at least v2.1.401.
 
-```
-cd <repo>
-dotnet test ./test
-```
+    ```
+    dotnet --version
+    ```
+
+2. Clone this repo.
+
+    ```
+    git clone https://github.com/intheclouds-blog/health-check-lambda.git
+    ```
+
+3. Run the tests to download dependencies, build, and test the code:
+
+    ```
+    cd health-check-lambda
+    dotnet test ./test
+    ```
 
 ### Manual Deployment
 
 The health-check-lambda Lambda function can be manually deployed using the `.NET Core CLI` and `Amazon Lambda Tools for .NET Core applications` using a command like the following:
 
 ```
+cd src
 dotnet lambda deploy-function -fn health-check-lambda -frole health-check-lambda
 ```
 
@@ -36,6 +47,7 @@ dotnet lambda deploy-function -fn health-check-lambda -frole health-check-lambda
 The health-check-lambda Lambda function can be manually invoked using the `.NET Core CLI` and `Amazon Lambda Tools for .NET Core applications` using a command like the following:
 
 ```
+cd src
 dotnet lambda invoke-function -fn health-check-lambda
 ```
 
