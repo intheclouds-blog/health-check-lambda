@@ -24,17 +24,14 @@ namespace InTheClouds.Lambda.HealthCheck.Tests
         }
 
         [Fact]
-        public void Function_FunctionHandler_Converts_Input_To_Upper_Case()
+        public async Task Function_FunctionHandler_Can_Be_Invoked()
         {
             // Arrange
             var function = new Function();
             var context = new TestLambdaContext();
          
             // Act
-            var result = function.FunctionHandler("hello world", context);
-
-            // Assert
-            Assert.Equal("HELLO WORLD", result);
+            await function.FunctionHandler(context);
         }
     }
 }

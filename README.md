@@ -1,6 +1,6 @@
 # health-check-lambda
 
-AWS Lambda function that Performs health checks of a configurable set of HTTP endpoints.
+AWS Lambda function that performs health checks of a configurable set of HTTP endpoints.
 
 ### Features
 
@@ -12,6 +12,22 @@ AWS Lambda function that Performs health checks of a configurable set of HTTP en
 
 TODO
 
+#### Manual Deployment
+
+The health-check-lambda Lambda function can be manually deployed using the `.NET Core CLI` and `Amazon Lambda Tools for .NET Core applications` using a command like the following:
+
+```
+dotnet lambda deploy-function -fn health-check-lambda -frole health-check-lambda
+```
+
+#### Manual Invocation
+
+The health-check-lambda Lambda function can be manually invoked using the `.NET Core CLI` and `Amazon Lambda Tools for .NET Core applications` using a command like the following:
+
+```
+dotnet lambda invoke-function -fn health-check-lambda
+```
+
 ### Dev Dependencies
 
 * .NET Core 2.1
@@ -22,6 +38,6 @@ TODO
 
 ### Test Dependencies
 
-* xUnit&#46;net 2.3.1
+* xUnit.net 2.3.1
 * Amazon.Lambda.TestUtilities 1.0.0
 * Microsoft.NET.Test.Sdk 15.5.0
