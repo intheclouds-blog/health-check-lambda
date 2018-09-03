@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
 using Amazon.Lambda.Core;
@@ -147,7 +148,7 @@ namespace InTheClouds.Lambda.HealthCheck
                 { keyName, new AttributeValue(DynamoDBKeyEndpoints) }
             };
 
-            var response = await _ddbClient.GetItemAsync(DynamoDBTableHealthCheckSettings, key);
+            var response = await _ddbClient.GetItemAsync(DynamoDBTableHealthCheckSettings, key, default(CancellationToken));
 
             return response.Item[valueName].SS;
         }
@@ -158,7 +159,7 @@ namespace InTheClouds.Lambda.HealthCheck
         /// <param name="message">The message to log.</param>
         private void Log(string message)
         {
-            LambdaLogger.Log(message + Environment.NewLine);
+            LambdaLogger.Log(message);
         }
 
         /// <summary>

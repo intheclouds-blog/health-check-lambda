@@ -41,3 +41,4 @@ dotnet lambda invoke-function -fn health-check-lambda
 * xUnit.net 2.3.1
 * Amazon.Lambda.TestUtilities 1.0.0
 * Microsoft.NET.Test.Sdk 15.5.0
+* FakeItEasy 4.8.0
