@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Reflection;
 using System.Threading;
@@ -9,6 +10,9 @@ using System.Threading.Tasks;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
 using Amazon.Lambda.Core;
+using Amazon.SimpleNotificationService;
+using Amazon.SimpleNotificationService.Model;
+using Newtonsoft.Json;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.Json.JsonSerializer))]
@@ -34,6 +38,11 @@ namespace InTheClouds.Lambda.HealthCheck
         private const string DynamoDBTableHealthCheckSettings = "health-check-settings";
 
         /// <summary>
+        /// The ARN for the SNS topic that should receive health check failure notifications.
+        /// </summary>
+        private const string SnsTopicHealthCheckFailure = "arn:aws:sns:us-west-2:594726427993:health-check-failure";
+
+        /// <summary>
         /// The AWS DynamoDB client used to obtain health check endpoints.
         /// </summary>
         private IAmazonDynamoDB _ddbClient;
@@ -42,6 +51,11 @@ namespace InTheClouds.Lambda.HealthCheck
         /// The <see cref="HttpClient"/> that should be used for endpoint health checks.
         /// </summary>
         private HttpClient _httpClient;
+
+        /// <summary>
+        /// The AWS SNS client used to send notifications for failed health checks.
+        /// </summary>
+        private IAmazonSimpleNotificationService _snsClient;
 
         /// <summary>
         /// The current version for the function.
@@ -59,7 +73,7 @@ namespace InTheClouds.Lambda.HealthCheck
         /// invocations.
         /// </remarks>
         public Function()
-            : this(null)
+            : this(null, null)
         {
         }
 
@@ -69,12 +83,13 @@ namespace InTheClouds.Lambda.HealthCheck
         /// <remarks>
         /// This constructor is useful for injecting fake client instances for unit testing.
         /// </remarks>
-        public Function(IAmazonDynamoDB ddbClient)
+        public Function(IAmazonDynamoDB ddbClient, IAmazonSimpleNotificationService snsClient)
         {
             _version = GetFunctionVersion();
             Log($"Initializing function v{_version}.");
 
             _ddbClient = ddbClient ?? new AmazonDynamoDBClient();
+            _snsClient = snsClient ?? new AmazonSimpleNotificationServiceClient();
             _httpClient = new HttpClient();
         }
 
@@ -162,6 +177,7 @@ namespace InTheClouds.Lambda.HealthCheck
             var watch = new Stopwatch();
             HttpResponseMessage healthCheckResponse = null;
             Exception healthCheckException = null;
+            DateTime healthCheckTime = DateTime.UtcNow;
 
             try
             {
@@ -178,24 +194,64 @@ namespace InTheClouds.Lambda.HealthCheck
                 watch.Stop();
             }
 
-            if (healthCheckException != null)
+            if (healthCheckResponse != null && healthCheckResponse.IsSuccessStatusCode)
             {
-                Log($"ERROR: Health check failed for {endpoint} after {watch.ElapsedMilliseconds:N0}ms. {healthCheckException.Message}");
-            }
-            else if (healthCheckResponse != null)
-            {
-                if (healthCheckResponse.IsSuccessStatusCode)
-                {
-                    Log($"INFO: Health check successful for {endpoint} in {watch.ElapsedMilliseconds:N0}ms.");
-                }
-                else
-                {
-                    Log($"ERROR: Health check failed for {endpoint} in {watch.ElapsedMilliseconds:N0}ms. Status Code: {healthCheckResponse.StatusCode}");
-                }
+                Log($"INFO: Health check successful for {endpoint} in {watch.ElapsedMilliseconds:N0}ms.");
             }
             else
             {
-                Log($"ERROR: Health check failed for {endpoint} in {watch.ElapsedMilliseconds:N0}ms. No response provided.");
+                await PublishNotificationAsync(endpoint, healthCheckTime, watch.ElapsedMilliseconds, healthCheckException, healthCheckResponse?.StatusCode);
+            }
+        }
+
+        /// <summary>
+        /// Asynchronously publishes a failure notification using AWS Simple Notification Service (SNS).
+        /// </summary>
+        /// <param name="endpoint">The endpoint for which a health check failed.</param>
+        /// <param name="time">The <see cref="DateTime"/> at which the health check was performed.</param>
+        /// <param name="elapsedMilliseconds">The number of milliseconds that elapsed while waiting for the endpoint to respond.</param>
+        /// <param name="ex">Optional. The exception that occurred when performing a health check.</param>
+        /// <param name="statusCode">Optional. The HTTP status code returned while trying to reach the endpoint.</param>
+        /// <returns>A Task that represents the SNS publish operation.</returns>
+        private async Task PublishNotificationAsync(string endpoint, 
+            DateTime time,
+            long elapsedMilliseconds,
+            Exception ex = null, 
+            HttpStatusCode? statusCode = null)
+        {
+            Log($"INFO: Publishing health check failure for {endpoint}");
+
+            string topicSubject;
+            string topicMessage;
+
+            if (ex != null)
+            {
+                topicSubject = $"Endpoint {endpoint} Health Check Failed: Exception";
+                topicMessage = $"The health check for endpoint {endpoint} failed at {time:o} with an exception after {elapsedMilliseconds:N0}ms:{Environment.NewLine}{Environment.NewLine}{ex}.";
+            }
+            else if (statusCode.HasValue)
+            {
+                topicSubject = $"Endpoint {endpoint} Health Check Failed: {(int)statusCode.Value}";
+                topicMessage = $"The health check for endpoint {endpoint} failed at {time:o} with an HTTP status code of {(int)statusCode.Value} after {elapsedMilliseconds:N0}ms.";
+            }
+            else
+            {
+                topicSubject = $"Endpoint {endpoint} Health Check Failed";
+                topicMessage = $"The health check for endpoint {endpoint} failed at {time:o} after {elapsedMilliseconds:N0}ms.";
+            }
+
+            var request = new PublishRequest
+            {
+                TopicArn = SnsTopicHealthCheckFailure,
+                Subject = topicSubject,
+                Message = topicMessage
+            };
+
+            var response = await _snsClient.PublishAsync(request);
+
+            if (response.HttpStatusCode != HttpStatusCode.OK)
+            {
+                Log($"ERROR: Error publishing to SNS for {endpoint}. {JsonConvert.SerializeObject(response)}");
             }
         }
     }
