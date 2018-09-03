@@ -51,7 +51,9 @@ https://www.intheclouds.blog/2018/09/03/endpoint-health-monitoring/
 
 6. Using the AWS Console, create an item in the above DynamoDB table with a key of `endpoint` and a StringSet named `value` that contains the list of endpoints to check.
 
-7. Using the AWS Console, create a CloudWatch Events rule to invoke the Lambda function at the desired frequency.
+7. Using the AWS Console, create an SNS topic to receive failure notifications. Update the topic ARN in Function.cs to match your topic.
+
+8. Using the AWS Console, create a CloudWatch Events rule to invoke the Lambda function at the desired frequency.
 
 ### Manual Deployment
 

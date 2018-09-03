@@ -41,7 +41,7 @@ namespace InTheClouds.Lambda.HealthCheck
         /// <summary>
         /// The ARN for the SNS topic that should receive health check failure notifications.
         /// </summary>
-        private const string SnsTopicHealthCheckFailure = "arn:aws:sns:us-west-2:594726427993:health-check-failure";
+        private const string SnsTopicHealthCheckFailure = "arn:aws:sns:<region>:<account>:health-check-failure";
 
         /// <summary>
         /// The AWS DynamoDB client used to obtain health check endpoints.
