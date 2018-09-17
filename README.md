@@ -49,28 +49,36 @@ https://www.intheclouds.blog/2018/09/03/endpoint-health-monitoring/
     aws dynamodb create-table --table-name health-check-settings --attribute-definitions AttributeName=key,AttributeType=S --key-schema AttributeName=key,KeyType=HASH --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5
     ```
 
-6. Using the AWS Console, create an item in the above DynamoDB table with a key of `endpoint` and a StringSet named `value` that contains the list of endpoints to check.
+6. Using the AWS Console, create an item in the above DynamoDB table with a key of `endpoints` and a StringSet named `value` that contains the list of endpoints to check.
 
 7. Using the AWS Console, create an SNS topic to receive failure notifications. Update the topic ARN in Function.cs to match your topic.
 
-8. Using the AWS Console, create a CloudWatch Events rule to invoke the Lambda function at the desired frequency.
+8. Using the AWS Console, create an IAM role with the permissions needed for the function to execute. For testing, the following broad AWS permissions policies can be used, but for a production environment, more fine grained policies should be considered.
+
+    * AWSLambdaExecute
+    * AmazonDynamoDBFullAccess
+    * AmazonSNSFullAccess
+
+9. Deploy the function as described in the Manual Deployment section below.
+
+10. Using the AWS Console, create a CloudWatch Events rule to invoke the Lambda function at the desired frequency.
 
 ### Manual Deployment
 
-The health-check-lambda Lambda function can be manually deployed using the `.NET Core CLI` and `Amazon Lambda Tools for .NET Core applications` using a command like the following:
+The health-check Lambda function can be manually deployed using the `.NET Core CLI` and `Amazon Lambda Tools for .NET Core applications` using a command like the following:
 
 ```
 cd src
-dotnet lambda deploy-function -fn health-check-lambda -frole health-check-lambda
+dotnet lambda deploy-function -fn health-check -frole health-check-execution-role
 ```
 
 ### Manual Invocation
 
-The health-check-lambda Lambda function can be manually invoked using the `.NET Core CLI` and `Amazon Lambda Tools for .NET Core applications` using a command like the following:
+The health-check Lambda function can be manually invoked using the `.NET Core CLI` and `Amazon Lambda Tools for .NET Core applications` using a command like the following:
 
 ```
 cd src
-dotnet lambda invoke-function -fn health-check-lambda
+dotnet lambda invoke-function -fn health-check
 ```
 
 ### Dev Dependencies
